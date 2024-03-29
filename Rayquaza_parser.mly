@@ -1,8 +1,15 @@
 %{ open Ast %}
 
-%token SEMI PRINT LPAREN RPAREN 
+%token SEMI COLON PRINT LPAREN RPAREN LBRACKET RBRACKET
 %token EOF
-
+/* Boolean operators */
+%token NOT OR AND
+/* Loops and conditionals */
+%token FOR WHILE IF ELIF ELSE
+/* Mathematical operators */
+%token PLUS MINUS TIMES DIVIDE MODULO
+/*Function tokens */
+%token DEF RETURN
 %start expr
 %type <Ast.expr> expr
 
