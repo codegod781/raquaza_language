@@ -1,19 +1,9 @@
-(* OCalmlex scannner for Rayquaza *)
+(* OCamllex scanner for Rayquaza *)
 
-{ open Parser}
-
-let letters = ['a'-'z' 'A'-'Z']
-let digits = ['0'-'9']
-
-(* 
-
-print("Hello, World!");
-
-*)
+{ open Parser }
 
 rule token = parse
   [' ' '\t' '\n'] { token lexbuf }
-(* |"/*" { comment lexbuf } *)
 | "print"   { PRINT }
 | '('       { LPAREN }
 | ')'       { RPAREN }
@@ -37,18 +27,24 @@ rule token = parse
 | "if"      { IF }
 | "else"    { ELSE }
 | "while"   { WHILE }
-| "for"     {FOR}
-(* RETURN *)
+| "for"     { FOR }
 | "return"  { RETURN }
-| "True"    { BLIT(true)  }
-| "False"   { BLIT(false) }
-| letter (digit | letter | '_')* as id { ID (Lexing.lexeme lexbuf) } (* ID for any string combination of letter *)
-| eof { EOF }
-| _ as c { raise (Failure ("illegal character " ^ Char.escaped c)) }
+(*| "True"    { TRUE }
+| "False"   { FALSE }*) (*Edited out until implemented*)
+| "\""      { STRING (read_string lexbuf false) }
+| ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '0'-'9' '_'])* as id { ID id }
+| eof       { EOF }
+| _ as c    { raise (Failure ("illegal character " ^ Char.escaped c)) }
 
-(*
-
-and comment = parse
-  "*/" { token lexbuf }
-
-*)
+and read_string lexbuf started =
+  if started then
+    match%sedlex lexbuf with
+    | "\"" -> ""
+    | eof -> raise (Failure "EOF in string")
+    | any -> let char = Sedlexing.Utf8.lexeme lexbuf in
+             char ^ read_string lexbuf true
+    | _ -> raise (Failure "String not terminated")
+  else
+    match%sedlex lexbuf with
+    | "\"" -> read_string lexbuf true
+    | _ -> raise (Failure "String not started correctly")
