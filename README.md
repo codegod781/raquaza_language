@@ -1,1 +1,2 @@
-# coms4115_final_project
+# Programming languages & Translators Final Project: Rayquaza
+
