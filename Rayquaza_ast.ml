@@ -19,8 +19,20 @@ type stmt =
   | Return of expr
   | FunctionDef of typ * string * (typ * string) list * stmt list
   | If of expr * stmt * stmt
+  | IfNoElse of expr * stmt
   | While of expr * stmt
 
 
 type program =
   | Program of stmt list
+
+(* type func_def = {
+  fname: string;
+  formals: string list;
+  body: stmt list;
+} *)
+
+  let string_of_program (prog) =
+    "\n\nParsed program: \n\n"  (* ^
+    String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
+    String.concat "\n" (List.map string_of_fdecl funcs) *)

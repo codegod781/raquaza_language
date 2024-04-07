@@ -1,6 +1,9 @@
 (* OCamllex scanner for Rayquaza *)
 
-{ open Parser }
+{ open Rayquaza_parser }
+
+let digit = ['0'-'9']
+let letter = ['a'-'z' 'A'-'Z']
 
 rule token = parse
   [' ' '\t' '\n'] { token lexbuf }
@@ -29,14 +32,15 @@ rule token = parse
 | "while"   { WHILE }
 | "for"     { FOR }
 | "return"  { RETURN }
+| digit+ as lem  { LITERAL(int_of_string lem) }
 (*| "True"    { TRUE }
 | "False"   { FALSE }*) (*Edited out until implemented*)
-| "\""      { STRING (read_string lexbuf false) }
+(*| "\""      { STRING (read_string lexbuf false) } *)
 | ['a'-'z' 'A'-'Z' '_'] (['a'-'z' 'A'-'Z' '0'-'9' '_'])* as id { ID id }
 | eof       { EOF }
 | _ as c    { raise (Failure ("illegal character " ^ Char.escaped c)) }
 
-and read_string lexbuf started =
+(*and read_string lexbuf started =
   if started then
     match%sedlex lexbuf with
     | "\"" -> ""
@@ -48,3 +52,4 @@ and read_string lexbuf started =
     match%sedlex lexbuf with
     | "\"" -> read_string lexbuf true
     | _ -> raise (Failure "String not started correctly")
+    *)
