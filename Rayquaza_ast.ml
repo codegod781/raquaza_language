@@ -14,25 +14,27 @@ type expr =
   | Seq of expr * expr
      
 type stmt =
-  | Block of stmt list
   | Expr of expr
   | Return of expr
   | FunctionDef of typ * string * (typ * string) list * stmt list
   | If of expr * stmt * stmt
   | IfNoElse of expr * stmt
   | While of expr * stmt
+  | Func of string * (string list) * (stmt list)
 
+
+(* 
+ * def foo(x, y, z):
+   {
+      statements
+   }
+ *)
 
 type program =
   | Program of stmt list
 
-(* type func_def = {
-  fname: string;
-  formals: string list;
-  body: stmt list;
-} *)
 
-  let string_of_program (prog) =
-    "\n\nParsed program: \n\n"  (* ^
-    String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
-    String.concat "\n" (List.map string_of_fdecl funcs) *)
+let string_of_program (prog) =
+  "\n\nParsed program: \n\n"  (* ^
+  String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
+  String.concat "\n" (List.map string_of_fdecl funcs) *)
