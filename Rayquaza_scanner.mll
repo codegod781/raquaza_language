@@ -32,6 +32,7 @@ rule token = parse
 | "while"   { WHILE }
 | "for"     { FOR }
 | "return"  { RETURN }
+| "def"  { DEF }
 | digit+ as lem  { LITERAL(int_of_string lem) }
 (*| "True"    { TRUE }
 | "False"   { FALSE }*) (*Edited out until implemented*)

@@ -40,13 +40,20 @@ program:
 // vassign:
 //   | ID ASSIGN expr {($1, $3)} 
 
+formals_opt:
+  /*nothing*/ { [] }
+  | formals_list { $1 }
+
+formals_list:
+  ID { [$1] }
+  | ID COMMA formals_list { $1::$3 }
+
 stmt:
   | expr SEMI                          { Expr($1) }
-  | LBRACE stmt_list RBRACE            { Block $2 }
-  | IF LPAREN expr RPAREN stmt ELSE stmt { If($3, $5, $7) }
   | IF LPAREN expr RPAREN stmt         { IfNoElse($3, $5) }
   | WHILE LPAREN expr RPAREN stmt      { While($3, $5) }
   | RETURN expr SEMI                   { Return $2 }
+  | DEF ID LPAREN formals_list RPAREN LBRACE stmt_list RBRACE { Func($2, $4, $7) }
 
 stmt_list:
   | stmt { [ $1 ] }
@@ -77,21 +84,3 @@ args:
   | expr                               { [$1] }
   | expr COMMA args                    { $1 :: $3 }
 
-formals_opt:
-  /*nothing*/ { [] }
-  | formals_list { $1 }
-
-formals_list:
-  ID { [$1] }
-  | ID COMMA formals_list { $1::$3 }
-
-/* fdecl */
-// fdecl:
-//   DEF ID LPAREN formals_opt RPAREN LBRACE stmt_list RBRACE
-//   {
-//     {
-//       fname=$2;
-//       formals=$4;
-//       body=$7
-//     }
-//   }
