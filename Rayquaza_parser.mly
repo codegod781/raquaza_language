@@ -50,7 +50,9 @@ formals_list:
 
 stmt:
   | expr SEMI                          { Expr($1) }
+  | LBRACE stmt_list RBRACE            { Block $2 }
   | IF LPAREN expr RPAREN stmt         { IfNoElse($3, $5) }
+  // | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
   | WHILE LPAREN expr RPAREN stmt      { While($3, $5) }
   | RETURN expr SEMI                   { Return $2 }
   | DEF ID LPAREN formals_list RPAREN LBRACE stmt_list RBRACE { Func($2, $4, $7) }
