@@ -3,10 +3,13 @@ open Rayquaza_ast
 %}
 %token SEMI COLON PRINT LPAREN RPAREN LBRACKET RBRACKET LBRACE RBRACE COMMA ASSIGN
 %token EOF
+/* python tokens*/
+%token IN RANGE APPEND POP 
+
 /* Boolean operators */
 %token NOT OR AND EQ NEQ LT
 /* Loops and conditionals */
-%token FOR WHILE IF ELSE
+%token FOR WHILE IF ELSE ELIF THEN
 /* Mathematical operators */
 %token PLUS MINUS TIMES DIVIDE MODULO
 /* Function tokens */
@@ -20,6 +23,10 @@ open Rayquaza_ast
 %start program
 %type <Rayquaza_ast.program> program
 
+
+
+%nonassoc NOELSE
+%nonassoc ELSE
 %right ASSIGN
 %left OR
 %left AND
@@ -48,14 +55,39 @@ formals_list:
   ID { [$1] }
   | ID COMMA formals_list { $1::$3 }
 
+// if_stmt:
+//   | IF expr stmt { If ($2, $3, [], None) }
+//   | IF expr stmt elif_blocks ELSE stmt { If ($2, $3, $4, Some $6) }
+//   | IF expr stmt elif_blocks { If ($2, $3, $4, None) }
+
+// elif_blocks:
+//   | ELIF expr stmt { [($2, $3)] }
+//   | elif_blocks ELIF expr stmt { ($3, $4) :: $1 }
+
+// if_stmt:
+//   | IF expr stmt elif_blocks optional_else { If ($2, $3, $4, $5) }
+
+// elif_blocks:
+//   | /* empty */                          { [] }
+//   | ELIF expr stmt elif_blocks           { ($2, $3) :: $4 }
+
+// optional_else:
+//   | /* empty */                          { None }
+//   | ELSE stmt                            { Some $2 }
+
 stmt:
   | expr SEMI                          { Expr($1) }
   | LBRACE stmt_list RBRACE            { Block $2 }
-  | IF LPAREN expr RPAREN stmt         { IfNoElse($3, $5) }
-  // | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
+  | IF LPAREN expr RPAREN stmt %prec NOELSE { If($3, $5, Block([])) }
+  | IF LPAREN expr RPAREN stmt ELSE stmt    { If($3, $5, $7) }
+  // | if_stmt  { $1 }
   | WHILE LPAREN expr RPAREN stmt      { While($3, $5) }
   | RETURN expr SEMI                   { Return $2 }
   | DEF ID LPAREN formals_list RPAREN LBRACE stmt_list RBRACE { Func($2, $4, $7) }
+
+// if_stmt:
+//   | IF LPAREN expr RPAREN THEN stmt ELSE stmt { If($3, $6, Some $8) }
+//   | IF LPAREN expr RPAREN THEN stmt           { If($3, $6, None) }
 
 stmt_list:
   | stmt { [ $1 ] }

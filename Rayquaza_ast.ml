@@ -18,9 +18,9 @@ type stmt =
     Block of stmt list
   | Expr of expr
   | Return of expr
-  | FunctionDef of typ * string * (typ * string) list * stmt list
+  (* | FunctionDef of typ * string * (typ * string) list * stmt list *)
   | If of expr * stmt * stmt
-  | IfNoElse of expr * stmt
+  (* | IfNoElse of expr * stmt *)
   | While of expr * stmt
   | Func of string * (string list) * (stmt list)
 
@@ -63,7 +63,7 @@ let rec string_of_expr = function
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
   | Id(s) -> s
-  | Var(v) -> "var " ^ v
+  | Var(v) -> v
   | Binop(e1, o, e2) ->
     string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
@@ -77,28 +77,27 @@ let rec string_of_stmt = function
     "{\n" ^ String.concat "" (List.map string_of_stmt stmts) ^ "}\n"
   | Expr(expr) -> string_of_expr expr ^ ";\n"
   | Return(expr) -> "return " ^ string_of_expr expr ^ ";\n"
+  (* | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
+                      string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2 *)
+  (* | IfNoElse(e, s) -> "if (" ^ string_of_expr e ^ ") " ^ string_of_stmt s *)
+  (* | If(e, s1, elifs, else_opt) ->
+    let if_part = "if (" ^ string_of_expr e ^ ") " ^ string_of_stmt s1 in
+    let elif_parts = List.map (fun (cond, stmt) ->
+      "elif (" ^ string_of_expr cond ^ ") " ^ string_of_stmt stmt) elifs in
+    let else_part = match else_opt with
+      | None -> ""
+      | Some s -> "else " ^ string_of_stmt s
+    in
+    if_part ^ "\n" ^ String.concat "\n" elif_parts ^ "\n" ^ else_part *)
+  | If(e, s, Block([])) -> "if (" ^ string_of_expr e ^ ")\n" ^ string_of_stmt s
   | If(e, s1, s2) ->  "if (" ^ string_of_expr e ^ ")\n" ^
-                      string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
-  | IfNoElse(e, s) -> "if (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
+            string_of_stmt s1 ^ "else\n" ^ string_of_stmt s2
   | While(e, s) -> "while (" ^ string_of_expr e ^ ") " ^ string_of_stmt s
   | Func(name, args, body) ->
     "def " ^ name ^ "(" ^ String.concat ", " args ^ ") {\n" ^
     String.concat "" (List.map string_of_stmt body) ^ "}\n"
 
 let string_of_vdecl (t, id) = id ^ ";\n"
-
-(* let string_of_fdecl fdecl =
-  string_of_typ fdecl.rtyp ^ " " ^
-  fdecl.fname ^ "(" ^ String.concat ", " (List.map snd fdecl.formals) ^
-  ")\n{\n" ^
-  String.concat "" (List.map string_of_vdecl fdecl.locals) ^
-  String.concat "" (List.map string_of_stmt fdecl.body) ^
-  "}\n" *)
-
-(* let string_of_program (vars, funcs) =
-  "\n\nParsed program: \n\n" ^
-  String.concat "" (List.map string_of_vdecl vars) ^ "\n" 
-  String.concat "\n" (List.map string_of_fdecl funcs) *)
 
   let string_of_program = function
   Program(stmts) ->
