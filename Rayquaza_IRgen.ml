@@ -2,56 +2,40 @@
  
  module L = Llvm
  module A = Ast
- open Sast
+(* ADD CALL TO SAST *)
+ (* open Sast *)
  
  module StringMap = Map.Make(String)
  
 
- (* Get types from the context *)
 
  (* translate : Sast.program -> Llvm.module *)
  let translate (globals, functions) =
     let context    = L.global_context () in
-    let the_module = L.create_module context "MicroC" in
+    let the_module = L.create_module context "Rayquaza" in
+
  (*GET RIGHT TYPES  *)
-    let i32_t      = L.i32_type    context
-    and i8_t       = L.i8_type     context
-    and i1_t       = L.i1_type     context in
+    let i32_t     = L.i32_type context
+    and i8_t      = L.i8_type context
+    and i1_t      = L.i1_type context
+(* ADDED TYPES: *)
+    and f32_t     = L.float_type context
+    and void_t    = L.void_type context
+    and str_t     = L.pointer_type i8_t in
+    
 
-
-
-    let ltype_of_typ = function
-       A.Int   -> i32_t
-     | A.Bool  -> i1_t
-   in
- 
-
-
-(* let translate (globals, functions) =
-  let context       = L.global_context () in
-  let the_module    = L.create_module context "Rayquaza"
-    and rq_int_t    = L.i64_type context
-    and rq_float_t  = L.double_type context
-    and rq_bool_t   = L.i1_type context
-    and rq_void_t   = L.void_type context in
-  let rq_str_t      = L.pointer_type i8_t in *)
-
-  (* IF WE WANT TO CREATE LIST FUNCTIONALITY WE ARE GONNA HAVE TO 
-     PUT ARRAY TYPES HERE *)
-
-  (* let ltype_of_typ = function
-     A.Int   -> rq_int_t
-   | A.Float -> rq_float_t
-   | A.Bool  -> rq_bool_t
-   | A.Str   -> rq_str_t
-   | A.None  -> rq_none_t
+  let ltype_of_typ = function
+     A.Int   -> i32_t
+   | A.Float -> f32_t
+   | A.Bool  -> i1_t
+   | A.Str   -> str_t
+   | A.Str_p -> L.pointer_type str_t
+   | A.None  -> void_t
    | A.Class(class_name)   -> L.pointer_type (StringMap.find class_name class_name_to_named_struct)
 (* | A.Array(typ)          -> 
        Follow array type with definition
  *)
- in *)
-
-
+ in 
 
 
 
@@ -59,18 +43,14 @@
    let global_vars : L.llvalue StringMap.t =
      let global_var m (t, n) =
        let init = L.const_int (ltype_of_typ t) 0
-       in StringMap.add n (L.define_global n init the_module) m in
-     List.fold_left global_var StringMap.empty globals in
+       in StringMap.add n (L.define_global n init the_module) m 
+      in
+      List.fold_left global_var StringMap.empty globals 
+    in
  
-   let printf_t : L.lltype =
-     L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
-   let printf_func : L.llvalue =
-     L.declare_function "printf" printf_t the_module in
+   let printf_t : L.lltype = L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+   let printf_func : L.llvalue = L.declare_function "printf" printf_t the_module in
  
-
-
-
-
 
    (* Define each function (arguments and return type) so we can
       call it even before we've created its body *)
@@ -139,16 +119,21 @@
      (* Construct code for an expression; return its value *)
      let rec build_expr builder ((_, e) : sexpr) = match e with
          SLiteral i  -> L.const_int i32_t i
-       | SBoolLit b  -> L.const_int i1_t (if b then 1 else 0)
-       | SId s       -> L.build_load (lookup s) s builder
-       | SAssign (s, e) -> let e' = build_expr builder e in
+        | SBoolLit b  -> L.const_int i1_t (if b then 1 else 0)
+(* add FLOAT *)
+        | SFloatLit f -> L.const_float float_t f
+        | SId s       -> L.build_load (lookup s) s builder
+        | SAssign (s, e) -> let e' = build_expr builder e in
          ignore(L.build_store e' (lookup s) builder); e'
-       | SBinop (e1, op, e2) ->
+        | SBinop (e1, op, e2) ->
          let e1' = build_expr builder e1
          and e2' = build_expr builder e2 in
          (match op with
             A.Add     -> L.build_add
           | A.Sub     -> L.build_sub
+(* add MUL and DIV *)
+          | A.Mul     -> L.build_fmul
+          | A.Div     -> L.build_fdiv
           | A.And     -> L.build_and
           | A.Or      -> L.build_or
           | A.Equal   -> L.build_icmp L.Icmp.Eq
