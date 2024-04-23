@@ -47,9 +47,9 @@ program:
 // vassign:
 //   | ID ASSIGN expr {($1, $3)} 
 
-formals_opt:
-  /*nothing*/ { [] }
-  | formals_list { $1 }
+//formals_opt:
+  /*nothing*/ //{ [] }
+  //| formals_list { $1 }
 
 formals_list:
   ID { [$1] }
