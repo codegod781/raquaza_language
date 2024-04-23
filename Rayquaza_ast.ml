@@ -1,4 +1,4 @@
-type operator = Add | Sub | Mul | Div | Equal | Neq | Less | And | Or
+type operator = Add | Sub | Mul | Div | Equal | Neq | Less | Greater | Mod | And | Or
 
 type typ = Int | Float | String | Bool
 
@@ -13,6 +13,9 @@ type expr =
   | Assign of string * expr
   | Call of string * expr list
   | Seq of expr * expr
+  | ArrayLit of expr list  (* array literals like [1, 2, 3] *)
+  | ArrayAccess of expr * expr  (* to access array elements, like  arr[0] *)
+  | ArrayAssign of expr * expr * expr  (* to assign to an array element, e.g., arr[0] = 1 *)
      
 type stmt =
     Block of stmt list
@@ -51,6 +54,8 @@ let string_of_op = function
   | Equal -> "=="
   | Neq -> "!="
   | Less -> "<"
+  | Greater -> ">"
+  | Mod -> "%"
   | And -> "and"
   | Or -> "or"
   | Mul -> "*"
@@ -71,6 +76,10 @@ let rec string_of_expr = function
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
   | Seq(e1, e2) ->
     string_of_expr e1 ^ "; " ^ string_of_expr e2
+  | ArrayLit(el) -> "[" ^ String.concat ", " (List.map string_of_expr el) ^ "]"
+  | ArrayAccess(arr, idx) -> string_of_expr arr ^ "[" ^ string_of_expr idx ^ "]"
+  | ArrayAssign(arr, idx, value) -> string_of_expr arr ^ "[" ^ string_of_expr idx ^ "] = " ^ string_of_expr value
+  
 
 let rec string_of_stmt = function
     Block(stmts) ->
