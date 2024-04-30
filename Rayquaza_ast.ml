@@ -1,6 +1,6 @@
 type operator = Add | Sub | Mul | Div | Equal | Neq | Less | Greater | Mod | And | Or
 
-type typ = Int | Float | String | Bool
+type typ = Int | Float | String | Bool | Char | Null
 
 type expr =
   | Literal of int
