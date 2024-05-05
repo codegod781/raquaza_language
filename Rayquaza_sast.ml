@@ -1,16 +1,16 @@
 (* Sementacally-checked Abstract Syntax Tree and functions for printing it *)
 
-Rayquaza_ast
+open Rayquaza_ast
 
-type sexpr = typ * sx
-and sx =
+type sexpr = expr 
+and expr =
     SLiteral of int
   | SFloatLit of float
   | SStringLit of string
   | SBoolLit of bool
   | SId of string
   | SVar of string
-  | SBinop of sexpr * op * sexpr
+  | SBinop of sexpr * operator * sexpr
   | SAssign of string * sexpr
   (* Call *)
   | SCall of string * sexpr list
@@ -25,7 +25,7 @@ type sstmt =
   | SReturn of sexpr
   | SIf of sexpr * sstmt * sstmt
   | SWhile of sexpr * sstmt
-  | SFunc of string * typ * bind list * sstmt 
+  | SFunc of string * string list * sstmt 
   
 
   (* 
