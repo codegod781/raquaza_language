@@ -4,6 +4,7 @@ type action = Ast | Sast | LLVM_IR
 
 let _ = 
   let action = ref LLVM_IR in
+  let channel = ref stdin in
   let set_action a () = action := a in
   let speclist = [
     ("-a", Arg.Unit (set_action Ast), "Print the AST");
@@ -14,13 +15,14 @@ let _ =
   Arg.parse speclist (fun filename -> channel := open_in filename) usage_msg;
 
   let lexbuf = Lexing.from_channel stdin in
-  let ast = Rayquaza_parse.program Rayquaza_scanner.token lexbuf in
+  let ast = Rayquaza_parser.program Rayquaza_scanner.token lexbuf in
   match !action with
     Ast -> print_string (Rayquaza_ast.string_of_program ast)
-  | _ -> let sast = Rayquaza_semant.check ast in
-    match !action with
-      Ast     -> ()
-    | Sast    -> print_string (Rayquaza_sast.string_of_sprogram sast)
+    | Sast ->
+    (* Temporarily bypass semantic analysis until Rayquaza_semant is implemented *)
+    (* let sast = Rayquaza_semant.check ast in
+       print_string (Rayquaza_sast.string_of_sprogram sast) *)
+    print_string "(Semantic analysis not implemented)"
     | LLVM_IR -> print_string (Llvm.string_of_llmodule (Irgen.translate sast))
 
 
