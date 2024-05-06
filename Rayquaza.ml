@@ -23,7 +23,7 @@ let _ =
     (* let sast = Rayquaza_semant.check ast in
        print_string (Rayquaza_sast.string_of_sprogram sast) *)
     print_string "(Semantic analysis not implemented)"
-    | LLVM_IR -> print_string (Llvm.string_of_llmodule (Irgen.translate sast))
+    | LLVM_IR -> print_string (Llvm.string_of_llmodule (Rayquaza_IRgen.translate sast))
 
 
 
