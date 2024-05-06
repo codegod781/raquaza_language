@@ -38,8 +38,7 @@ type sstmt =
       } 
   *)
 
-  type sprogram = 
-    SProgram of stmt list
+  type sprogram = sstmt list
 
   let rec string_of_sexpr = function 
       | SLiteral(l) -> string_of_int l
@@ -77,10 +76,9 @@ type sstmt =
 
   (* let string_of_svdecl (t, id) = id ^ " :\n " ^ *)
 
-   let string_of_sprogram = function
-   Program(stmts) ->
-   "\n\nParsed program: \n\n" ^
-   String.concat "\n" (List.map string_of_sstmt stmts)
+   let string_of_sprogram (sstmts : sstmt list) =
+  "\n\nSemantically checked program:\n\n" ^
+  String.concat "\n" (List.map string_of_sstmt sstmts)
 
     (*let string_of_sprogram (sstmts) = 
     "\n\nSementically checked program: \n\n" ^
