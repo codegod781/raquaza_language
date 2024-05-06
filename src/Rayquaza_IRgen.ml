@@ -12,10 +12,7 @@
   llvalue: L.llvalue;
   typ: A.typ;
 }
-
-
  
-
 
  (* translate : Sast.program -> Llvm.module *)
  let translate (globals, functions) =
@@ -28,7 +25,7 @@
   (* ADDED TYPES: *)
       and f32_t     = L.float_type context
       and void_t    = L.void_type context in
-    let str_t = L.pointer_type i8_t in    
+    let str_t = L.pointer_type context in     
 
   let ltype_of_typ = function
      A.Int    -> i32_t
@@ -37,7 +34,7 @@
    | A.String -> str_t
    | A.Char   -> i8_t
    | A.Null   -> void_t 
-   (* | A.Str_p -> L.pointer_type str_t *)
+   (*| A.Str_p -> L.pointer_type str_t *)
    (* | A.None  -> void_t *)
    (* | A.Class(class_name)   -> L.pointer_type (StringMap.find class_name class_name_to_named_struct) *)
 (* | A.Array(typ)          -> 
@@ -56,7 +53,7 @@
       List.fold_left global_var StringMap.empty globals 
     in
  
-   let printf_t =  L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
+   let printf_t =  L.var_arg_function_type i32_t [| L.pointer_type context |] in
    let printf_func =  L.declare_function "printf" printf_t the_module in
  
 

@@ -106,7 +106,7 @@ let rec string_of_stmt = function
     "def " ^ name ^ "(" ^ String.concat ", " args ^ ") {\n" ^
     String.concat "" (List.map string_of_stmt body) ^ "}\n"
 
-let string_of_vdecl (t, id) = id ^ ";\n"
+let string_of_vdecl (_, id) = id ^ ";\n"
 
   let string_of_program = function
   Program(stmts) ->
