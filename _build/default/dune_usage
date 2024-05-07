@@ -1,0 +1,7 @@
+To use dune:
+
+do dune build@all
+
+Clean after every use!:
+
+dune clean

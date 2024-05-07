@@ -1,0 +1,7 @@
+(executable
+ (name Rayquaza)
+ (libraries llvm ppx_deriving.show))
+
+(ocamlyacc Rayquaza_parser)
+(ocamllex Rayquaza_scanner)
+
