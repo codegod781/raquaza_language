@@ -43,9 +43,12 @@ type program =
   "\n\nParsed program: \n\n"  (* ^
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
   String.concat "\n" (List.map string_of_fdecl funcs) *) *)
-
-
-(* type program = bind list * func_def list *)
+type func_def = {
+  fname: string;            (* Function name *)
+  params: string list;      (* Parameter names *)
+  body: stmt list;         (* Function body *)
+}
+(*type program = string list * sfunc_def list*)
 
 (* Pretty-printing functions *)
 let string_of_op = function

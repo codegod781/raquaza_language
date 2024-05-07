@@ -28,17 +28,14 @@ type sstmt =
   | SFunc of string * string list * sstmt list
   
 
-  (* 
-      type sfunc_def = {
-        srtyp : typ;
-        sfname : string;
-        sformals : bind list;
-        slocals : bind list;
-        sbody : stmt list;
-      } 
-  *)
+  type sfunc_def = {
+  sfname: string;            (* Function name *)
+  sparams: string list;      (* Parameter names *)
+  sbody: sstmt list;         (* Function body *)
+}
 
   type sprogram = sstmt list
+  (*type sprogram = string list * sfunc_def list*)
 
   let rec string_of_sexpr = function 
       | SLiteral(l) -> string_of_int l

@@ -3,7 +3,8 @@
  module L = Llvm
  module A = Rayquaza_ast
 (* ADD CALL TO SAST *)
- (* open Sast *)
+ open Rayquaza_sast
+
  module StringMap = Map.Make(String)
  (* open Llvm_bitreader
  open Llvm_linker *)
@@ -11,22 +12,23 @@
  type symbol_table_entry = {
   llvalue: L.llvalue;
   typ: A.typ;
-}
- 
+} 
 
  (* translate : Sast.program -> Llvm.module *)
  let translate (globals, functions) =
-    let context    = L.global_context () in
-    let the_module = L.create_module context "Rayquaza" 
+    let context    = L.global_context () in  
+    let the_module = L.create_module context "Rayquaza" in 
  (*GET RIGHT TYPES  *)
-      and i32_t     = L.i32_type context
-      and i8_t      = L.i8_type context
-      and i1_t      = L.i1_type context
+    let i32_t     = L.i32_type context 
+    and i8_t      = (L.i8_type context)
+    and i1_t      = L.i1_type context
   (* ADDED TYPES: *)
-      and f32_t     = L.float_type context
-      and void_t    = L.void_type context in
-    let str_t = L.pointer_type context in     
-
+    and f32_t     = L.float_type context
+    and void_t    = L.void_type context in
+  (* let voidptr = L.pointer_type i8_t in*)
+    let voidptr = L.pointer_type (i8_t) in
+    let str_t = L.pointer_type context in 
+    
   let ltype_of_typ = function
      A.Int    -> i32_t
    | A.Float  -> f32_t
@@ -56,18 +58,48 @@
    let printf_t =  L.var_arg_function_type i32_t [| L.pointer_type context |] in
    let printf_func =  L.declare_function "printf" printf_t the_module in
  
+   let function_decls =
+    let function_decl m (SFunc(name, args, body)) =
+      let formal_types = Array.make (List.length args) voidptr (* Use voidptr for all parameters *)
+      in let ftype = L.function_type voidptr formal_types (* Assuming functions return generic pointer *)
+      in let llvm_func = L.define_function name ftype the_module
+      in StringMap.add name (llvm_func, args, body) m
+    in
+    List.fold_left function_decl StringMap.empty functions
+  in
+
+  let build_function_body (name, args, body) =
+    let (the_function, _, _) = StringMap.find name function_decls in
+    let builder = L.builder_at_end context (L.entry_block the_function) in
+
+    let add_formal m n p =
+      L.set_value_name n p;
+      let local = L.build_alloca voidptr n builder in
+      ignore (L.build_store p local builder);
+      StringMap.add n local m
+    in
+    let params = Array.to_list (L.params the_function) in
+    let paramList = List.map2 add_formal StringMap.empty args params in
 
    (* Define each function (arguments and return type) so we can
       call it even before we've created its body *)
- 
-   let function_decls : (L.llvalue * sfunc_def) StringMap.t =
+
+ (* let translate (globals, functions) =
+  let context = L.global_context () in
+  let the_module = L.create_module context "Rayquaza" in
+  let void_t = L.void_type context in
+  let ptr_t = L.pointer_type (L.i8_type context) in  (* Default type for all parameters *)*)
+
+  
+
+  (* let function_decls : (L.llvalue * sfunc_def) StringMap.t =
      let function_decl m fdecl =
        let name = fdecl.sfname
        and formal_types =
-         Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) fdecl.sformals)
+         Array.of_list (List.map (fun (t,_) -> ltype_of_typ t) fdecl.sparams)
        in let ftype = L.function_type (ltype_of_typ fdecl.srtyp) formal_types in
        StringMap.add name (L.define_function name ftype the_module, fdecl) m in
-     List.fold_left function_decl StringMap.empty functions in
+     List.fold_left function_decl StringMap.empty functions in*)
 
 
 
@@ -87,7 +119,7 @@
   
  
    (* Fill in the body of the given function *)
-   let build_function_body fdecl =
+   (*let build_function_body fdecl =
      let (the_function, _) = StringMap.find fdecl.sfname function_decls in
      let builder = L.builder_at_end context (L.entry_block the_function) in
  
@@ -119,7 +151,7 @@
         Check local names first, then global names *)
      let lookup n = try StringMap.find n local_vars
        with Not_found -> StringMap.find n global_vars
-     in
+     in*)
  
      (* Construct code for an expression; return its value *)
      let rec build_expr builder ((_, e) : sexpr) = match e with
@@ -212,5 +244,5 @@
    in
  
    List.iter build_function_body functions;
-   the_module
- 
+
+   the_module 
