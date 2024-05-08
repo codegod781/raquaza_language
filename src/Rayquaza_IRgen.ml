@@ -27,7 +27,7 @@
     and f32_t     = L.float_type context
     and void_t    = L.void_type context in
   (* let voidptr = L.pointer_type i8_t in*)
-    let voidptr = L.pointer_type context in
+    let voidptr = L.pointer_type (i8_t) in
     let str_t = L.pointer_type context in 
     
   let ltype_of_typ = function
@@ -156,7 +156,7 @@
  
      (* Return the value for a variable or formal argument.
         Check local names first, then global names *)
-     let lookup n = try StringMap.find n local_vars
+     let lookup n = try StringMap.find n !local_vars
        with Not_found -> StringMap.find n global_vars
      in
  
