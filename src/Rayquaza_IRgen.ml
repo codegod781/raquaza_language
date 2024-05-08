@@ -23,6 +23,7 @@
     and i8_t      = (L.i8_type context)
     and i1_t      = L.i1_type context
   (* ADDED TYPES: *)
+    and float_t    = L.double_type context
     and f32_t     = L.float_type context
     and void_t    = L.void_type context in
   (* let voidptr = L.pointer_type i8_t in*)
@@ -79,11 +80,11 @@
       L.set_value_name n p;
       let local = L.build_alloca voidptr n builder in
       ignore (L.build_store p local builder);
-      (n, local)
+      local
     in
     let params = Array.to_list (L.params the_function) in
-    let paramList = List.map2 add_formal args (Array.to_list (L.params the_function))in
-    (func, builder, paramList)
+    let paramList = List.map2 add_formal args (Array.to_list (L.                                       params the_function)) in
+    (*(the_function, builder, paramList)*)
 
    (* Define each function (arguments and return type) so we can
       call it even before we've created its body *)
@@ -149,16 +150,16 @@
        let formals = List.fold_left2 add_formal StringMap.empty fdecl.sformals
            (Array.to_list (L.params the_function)) in
        List.fold_left add_local formals fdecl.slocals
-     in
+     in*)
  
      (* Return the value for a variable or formal argument.
         Check local names first, then global names *)
-     let lookup n = try StringMap.find n local_vars
+     let lookup n = try StringMap.find n local
        with Not_found -> StringMap.find n global_vars
-     in*)
+     in
  
      (* Construct code for an expression; return its value *)
-     let rec build_expr builder ((_, e) : sexpr) = match e with
+ let rec build_expr builder (e : sexpr) = match e with
          SLiteral i  -> L.const_int i32_t i
         | SBoolLit b  -> L.const_int i1_t (if b then 1 else 0)
 (* add FLOAT *)
