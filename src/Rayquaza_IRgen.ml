@@ -59,11 +59,14 @@
    let printf_func =  L.declare_function "printf" printf_t the_module in
  
    let function_decls =
-    let function_decl m (SFunc(name, args, body)) =
+    let function_decl m sstmt =
+     match sstmt with 
+     |(SFunc(name, args, body)) ->
       let formal_types = Array.make (List.length args) voidptr (* Use voidptr for all parameters *)
       in let ftype = L.function_type voidptr formal_types (* Assuming functions return generic pointer *)
       in let llvm_func = L.define_function name ftype the_module
       in StringMap.add name (llvm_func, args, body) m
+     | _ -> m
     in
     List.fold_left function_decl StringMap.empty functions
   in
@@ -72,14 +75,15 @@
     let (the_function, _, _) = StringMap.find name function_decls in
     let builder = L.builder_at_end context (L.entry_block the_function) in
 
-    let add_formal m n p =
+    let add_formal n p =
       L.set_value_name n p;
       let local = L.build_alloca voidptr n builder in
       ignore (L.build_store p local builder);
-      StringMap.add n local m
+      (n, local)
     in
     let params = Array.to_list (L.params the_function) in
-    let paramList = List.map2 add_formal StringMap.empty args params in
+    let paramList = List.map2 add_formal args (Array.to_list (L.params the_function))in
+    (func, builder, paramList)
 
    (* Define each function (arguments and return type) so we can
       call it even before we've created its body *)
