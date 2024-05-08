@@ -28,7 +28,7 @@
     and void_t    = L.void_type context in
   (* let voidptr = L.pointer_type i8_t in*)
     let voidptr = L.pointer_type (i8_t) in
-    let str_t = L.pointer_type context in 
+    let str_t = L.pointer_type i8_t in 
     
   let ltype_of_typ = function
      A.Int    -> i32_t
@@ -56,7 +56,7 @@
       List.fold_left global_var StringMap.empty globals 
     in
  
-   let printf_t =  L.var_arg_function_type i32_t [| L.pointer_type context |] in
+   let printf_t =  L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
    let printf_func =  L.declare_function "printf" printf_t the_module in
  
    let function_decls =
