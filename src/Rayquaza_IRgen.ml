@@ -75,15 +75,17 @@
   let build_function_body (name, args, body) =
     let (the_function, _, _) = StringMap.find name function_decls in
     let builder = L.builder_at_end context (L.entry_block the_function) in
+    let local_vars = ref StringMap.empty in
 
-    let add_formal n p =
-      L.set_value_name n p;
-      let local = L.build_alloca voidptr n builder in
-      ignore (L.build_store p local builder);
-      local
+    let add_formal arg_name param =
+      L.set_value_name arg_name param;
+      let local = L.build_alloca voidptr arg_name builder in
+      ignore (L.build_store param local builder);
+      local_vars :=StringMap.add arg_name local !local_vars;
     in
     let params = Array.to_list (L.params the_function) in
-    let paramList = List.map2 add_formal args (Array.to_list (L.                                       params the_function)) in
+    (*List.iter2 add_formal args params;*)
+    let paramList = List.map2 add_formal args (Array.to_list (L.params the_function)) in 
     (*(the_function, builder, paramList)*)
 
    (* Define each function (arguments and return type) so we can
@@ -154,7 +156,7 @@
  
      (* Return the value for a variable or formal argument.
         Check local names first, then global names *)
-     let lookup n = try StringMap.find n local
+     let lookup n = try StringMap.find n local_vars
        with Not_found -> StringMap.find n global_vars
      in
  
